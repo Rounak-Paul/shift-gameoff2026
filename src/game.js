@@ -8,7 +8,7 @@ import {
   collapse,
   hint,
 } from "./engine.js";
-import { BOARD, project, unproject } from "./board.js";
+import { BOARD, project, unproject, magneticTarget } from "./board.js";
 import { renderBoard, COLORS } from "./renderer.js";
 import { ShiftAudio } from "./audio.js";
 const $ = (id) => document.getElementById(id);
@@ -213,7 +213,8 @@ function resize() {
     velocity *= ratio;
     if (drag) {
       drag.start = drag.last;
-      drag.base = offset;
+      drag.base = drag.raw * cell;
+      drag.target = magneticTarget(drag.raw, drag.detent).cells * cell;
     }
   }
 }
@@ -394,20 +395,7 @@ function point(event) {
 /** Ends the current pointer gesture, optionally canceling its pending movement. */
 function release(event, cancel = false) {
   if (!drag || event.pointerId !== pointerId) return;
-  const stale = performance.now() - drag.lastTime > 100;
-  target = cancel
-    ? 0
-    : Math.max(
-        -SIZE,
-        Math.min(
-          SIZE,
-          Math.round(
-            (offset +
-              (stale ? 0 : Math.max(-cell, Math.min(cell, velocity * 0.14)))) /
-              cell,
-          ),
-        ),
-      ) * cell;
+  target = cancel ? 0 : drag.detent * cell;
   drag = null;
   mode = "settle";
   arrival = false;
@@ -437,7 +425,7 @@ canvas.addEventListener("pointerdown", (event) => {
   tickCell = 0;
   pointerId = event.pointerId;
   canvas.setPointerCapture(pointerId);
-  drag = { start: p.x, last: p.x, lastTime: performance.now(), base: 0 };
+  drag = { start: p.x, last: p.x, base: 0, raw: 0, detent: 0, target: 0 };
   hintUntil = 0;
 
   emit("grab");
@@ -446,23 +434,11 @@ canvas.addEventListener("pointermove", (event) => {
   const p = point(event);
   hover = p.inside ? Math.floor(p.y / cell) : -1;
   if (!drag || event.pointerId !== pointerId) return;
-  const now = performance.now(),
-    dt = (now - drag.lastTime) / 1000;
-  const raw = (p.x - drag.start + drag.base) / cell,
-    whole = Math.floor(raw + 0.5),
-    fraction = raw - whole;
-  const shown =
-    (whole + 0.35 * fraction + 2.6 * fraction * fraction * fraction) * cell;
-  if (dt > 0) {
-    velocity +=
-      (Math.max(-cell * 35, Math.min(cell * 35, (shown - offset) / dt)) -
-        velocity) *
-      (1 - Math.exp(-25 * dt));
-  }
-  offset = shown;
+  drag.raw = (p.x - drag.start + drag.base) / cell;
+  const magnet = magneticTarget(drag.raw, drag.detent);
+  drag.detent = magnet.detent;
+  drag.target = magnet.cells * cell;
   drag.last = p.x;
-  drag.lastTime = now;
-  ticks();
 });
 canvas.addEventListener("pointerup", (e) => release(e));
 canvas.addEventListener("pointercancel", (e) => release(e, true));
@@ -615,7 +591,10 @@ function frame(time) {
   const dt = lastTime ? Math.min((time - lastTime) / 1000, 1 / 30) : 1 / 60;
   lastTime = time;
   if (!document.hidden) {
-    if (mode === "settle") {
+    if (mode === "drag") {
+      [offset, velocity] = spring(offset, velocity, drag.target, dt);
+      ticks();
+    } else if (mode === "settle") {
       [offset, velocity] = spring(offset, velocity, target, dt);
       ticks();
       if (!arrival && Math.abs(target - offset) < cell * 0.02) {

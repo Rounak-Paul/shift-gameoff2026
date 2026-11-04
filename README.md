@@ -16,7 +16,7 @@ Open http://127.0.0.1:5173. The build writes `dist/` and `shift-itch.zip`.
 
 ## Play
 
-- Drag a row horizontally; its tiles wrap across the cartridge and settle with momentum.
+- Drag a row horizontally; its tiles resist slightly, then snap magnetically past the detent. Wrapping tiles exit completely before re-entering from the opposite gutter.
 - Match at least three equal colors/shapes in a horizontal or vertical line. Matches do not wrap across board edges.
 - Q/E rotates the flat cartridge a quarter-turn, making columns into rows.
 - Match cascades multiply points: 10 points per tile × chain depth.
@@ -45,4 +45,4 @@ The game needs a web server; opening `index.html` directly with `file://` does n
 - `assets/audio/`: original grab, tick, thunk, and whoosh samples copied from `QuasarEngine/projects/Shift`.
 - `tests/engine.test.js`, `tests/board.test.js`: deterministic rules, cascades, projection, hit testing, and turn continuity tests.
 
-The original Quasar prototype's 6×6 board, six colors, row wrapping, detent curve, flick projection, damped springs, quarter turns, one queued rotation, and four sounds are preserved. Match clearing, gravity, cascading, score, hints, and the retro console presentation extend that prototype.
+The original Quasar prototype's 6×6 board, six colors, row wrapping, damped springs, quarter turns, one queued rotation, and four sounds are preserved. Match clearing, gravity, cascading, score, hints, stronger magnetic drag detents, single-instance gutter handoffs, and the retro console presentation extend that prototype.

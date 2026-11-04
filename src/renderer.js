@@ -1,5 +1,5 @@
-import { SIZE, wrap } from "./engine.js";
-import { BOARD, turnScale } from "./board.js";
+import { SIZE } from "./engine.js";
+import { BOARD, turnScale, slidePosition } from "./board.js";
 
 export const COLORS = [
   "#bd573e",
@@ -113,11 +113,37 @@ function cartridge(ctx) {
     }
 }
 
-/** Draws inset selector shoes and brass track edges for row, with stronger active feedback. */
-function rowSelector(ctx, row, active, hinting, pulse) {
-  const y = BOARD.origin + row * BOARD.pitch;
-  const bright = active || hinting;
-  ctx.save();
+/** Draws recessed side channels only for row, with warm rails when active or hinted. */
+function gutters(ctx, row, active, hinting, pulse) {
+  if (row < 0) return;
+  const y = BOARD.origin + row * BOARD.pitch,
+    width = BOARD.origin;
+  const end = BOARD.origin + SIZE * BOARD.pitch;
+  for (const x of [0, end]) {
+    ctx.fillStyle = "#526e66";
+    rect(ctx, x - 2, y + 1, width + 4, 70, 3);
+    ctx.fillStyle = "#1c383c";
+    rect(ctx, x, y + 3, width, 66, 1);
+    ctx.fillStyle = "#081e28";
+    rect(ctx, x + 1, y + 4, width - 2, 64, 2);
+    const shade = ctx.createLinearGradient(x, 0, x + width, 0);
+    shade.addColorStop(0, x === 0 ? "#020e18" : "#203b3c");
+    shade.addColorStop(1, x === 0 ? "#203b3c" : "#020e18");
+    ctx.fillStyle = shade;
+    rect(ctx, x + 2, y + 6, width - 4, 60, 1);
+    ctx.fillStyle =
+      active || hinting ? `rgba(229,184,112,${pulse})` : "#9bab8f";
+    ctx.fillRect(x + 2, y + 3, width - 4, 1);
+    ctx.fillRect(x + 2, y + 68, width - 4, 1);
+    ctx.fillStyle = "#102c34";
+    for (let i = 0; i < 5; i++) ctx.fillRect(x + 12 + i * 14, y + 32, 4, 8);
+  }
+}
+
+/** Extends the selected row's brass guide rails across the board and its side gutters. */
+function rowSelector(ctx, row, active, hinting) {
+  const y = BOARD.origin + row * BOARD.pitch,
+    bright = active || hinting;
   ctx.fillStyle = bright ? "#b28d493d" : "#b6b38820";
   rect(ctx, 80, y + 1, 440, 71, 1);
   const rail = ctx.createLinearGradient(84, 0, 516, 0);
@@ -127,21 +153,25 @@ function rowSelector(ctx, row, active, hinting, pulse) {
   ctx.fillStyle = rail;
   ctx.fillRect(84, y + 1, 432, 1);
   ctx.fillRect(84, y + 71, 432, 1);
-  for (const x of [66, 520]) {
-    ctx.fillStyle = "#11292e";
-    rect(ctx, x - 1, y + 11, 15, 50, 2);
-    ctx.fillStyle = bright ? "#a88a5d" : "#647d70";
-    rect(ctx, x, y + 12, 13, 47, 1);
-    ctx.fillStyle = bright ? "#dbbb80" : "#95a68a";
-    ctx.fillRect(x + 1, y + 12, 11, 1);
-    ctx.fillStyle = "#243e3b";
-    rect(ctx, x + 3, y + 22, 7, 27, 1);
-    for (let i = 0; i < 3; i++) {
-      ctx.fillStyle = bright ? `rgba(239,181,102,${pulse})` : "#a3b49a";
-      ctx.fillRect(x + 4, y + 25 + i * 7, 5, 3);
-    }
+}
+
+/** Shades the gutter mouths over moving tiles, so they pass beneath the cartridge's side lips. */
+function gutterLips(ctx, row) {
+  if (row < 0) return;
+  const y = BOARD.origin + row * BOARD.pitch,
+    width = BOARD.origin;
+  const end = BOARD.origin + SIZE * BOARD.pitch;
+  for (const x of [0, end]) {
+    const shade = ctx.createLinearGradient(x, 0, x + width, 0);
+    shade.addColorStop(0, x === 0 ? "#051620e6" : "#05162000");
+    shade.addColorStop(1, x === 0 ? "#05162000" : "#051620e6");
+    ctx.fillStyle = shade;
+    ctx.fillRect(x, y + 5, width, 62);
+    ctx.fillStyle = "#9aaa8870";
+    ctx.fillRect(x === 0 ? x : x + width - 2, y + 7, 2, 58);
+    ctx.fillStyle = "#071b24";
+    ctx.fillRect(x === 0 ? x + 2 : x + width - 4, y + 7, 2, 58);
   }
-  ctx.restore();
 }
 
 /** Renders the flat sliding cartridge from gameplay state; console layout remains DOM-owned. */
@@ -176,30 +206,26 @@ export function renderBoard(ctx, state) {
   ctx.scale(rotationScale, rotationScale);
   ctx.translate(-300, -300);
   cartridge(ctx);
-  if (focusRow >= 0 && mode !== "rotate") {
+  const visibleFocus = mode === "rotate" ? -1 : focusRow;
+  const hinting = hintRow === visibleFocus && visibleFocus >= 0;
+  const pulse =
+    hinting && !reducedMotion ? 0.7 + 0.3 * Math.sin(time * 0.006) : 1;
+  gutters(ctx, visibleFocus, focusActive, hinting, pulse);
+  if (visibleFocus >= 0) rowSelector(ctx, visibleFocus, focusActive, hinting);
+  if (hinting) {
     const y = BOARD.origin + focusRow * BOARD.pitch;
-    const hinting = hintRow === focusRow;
-    const pulse =
-      hinting && !reducedMotion ? 0.7 + 0.3 * Math.sin(time * 0.006) : 1;
-    rowSelector(ctx, focusRow, focusActive, hinting, pulse);
-    if (hinting) {
-      ctx.fillStyle = "#f8d295";
-      ctx.font = "bold 17px Courier New";
-      ctx.textAlign = "center";
-      const x = hintCount > 0 ? 563 : 37;
-      ctx.fillText(String(Math.abs(hintCount)), x, y + 32);
-      ctx.font = "bold 20px Courier New";
-      ctx.fillText(hintCount > 0 ? "→" : "←", x, y + 53);
-    }
+    ctx.fillStyle = "#f8d295";
+    ctx.font = "bold 15px Courier New";
+    ctx.textAlign = "center";
+    ctx.fillText(
+      `${hintCount > 0 ? "→" : "←"}${Math.abs(hintCount)}`,
+      hintCount > 0 ? 548 : 52,
+      y - 4,
+    );
   }
   ctx.save();
   ctx.beginPath();
-  ctx.rect(
-    BOARD.origin,
-    BOARD.origin,
-    BOARD.pitch * SIZE,
-    BOARD.pitch * SIZE + 4,
-  );
+  ctx.rect(0, BOARD.origin, BOARD.size, BOARD.pitch * SIZE + 4);
   ctx.clip();
   for (let r = 0; r < SIZE; r++)
     for (let c = 0; c < SIZE; c++) {
@@ -208,7 +234,7 @@ export function renderBoard(ctx, state) {
         scale = 1,
         alpha = 1;
       const sliding = (mode === "drag" || mode === "settle") && r === row;
-      if (sliding) u = wrap(u + offset / cell, SIZE);
+
       if (mode === "clear" && clearCells.includes(r * SIZE + c)) {
         const t = reducedMotion
           ? Math.min(phase / 0.08, 1)
@@ -220,12 +246,15 @@ export function renderBoard(ctx, state) {
         const t = Math.min(phase / (reducedMotion ? 0.08 : 0.5), 1);
         v -= Math.pow(1 - t, 3) * fallDistances[r][c];
       }
-      const x = BOARD.origin + u * BOARD.pitch,
-        y = BOARD.origin + v * BOARD.pitch;
+      const position = sliding
+        ? slidePosition(c, offset / cell)
+        : { x: BOARD.origin + u * BOARD.pitch, visible: true };
+      if (!position.visible) continue;
+      const y = BOARD.origin + v * BOARD.pitch;
       tile(
         ctx,
         grid[r][c],
-        x,
+        position.x,
         y,
         angle,
         scale,
@@ -233,31 +262,8 @@ export function renderBoard(ctx, state) {
         mode === "clear" && clearCells.includes(r * SIZE + c),
         r === focusRow && mode !== "rotate",
       );
-      if (sliding && u < 0.5)
-        tile(
-          ctx,
-          grid[r][c],
-          x + SIZE * BOARD.pitch,
-          y,
-          angle,
-          scale,
-          alpha,
-          false,
-          true,
-        );
-      if (sliding && u > 5.5)
-        tile(
-          ctx,
-          grid[r][c],
-          x - SIZE * BOARD.pitch,
-          y,
-          angle,
-          scale,
-          alpha,
-          false,
-          true,
-        );
     }
   ctx.restore();
+  gutterLips(ctx, visibleFocus);
   ctx.restore();
 }

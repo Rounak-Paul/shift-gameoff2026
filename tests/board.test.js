@@ -1,6 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { BOARD, project, unproject, turnScale } from "../src/board.js";
+import {
+  BOARD,
+  project,
+  unproject,
+  turnScale,
+  magneticTarget,
+  slidePosition,
+} from "../src/board.js";
 
 test("all tile centers map back to the correct row and column", () => {
   for (let r = 0; r < 6; r++)
@@ -51,4 +58,48 @@ test("outside points cannot grab a tile and captured drags retain their full dis
     false,
   );
   assert.equal(unproject(-72, 300).u, (-72 - BOARD.origin) / BOARD.pitch);
+});
+
+test("magnetic detents resist small movement, snap past threshold, and reject boundary jitter", () => {
+  const resting = magneticTarget(0.3, 0);
+  assert.equal(resting.detent, 0);
+  assert.ok(resting.cells < 0.1);
+  assert.equal(magneticTarget(0.56, 0).detent, 0);
+  assert.equal(magneticTarget(0.57, 0).detent, 1);
+  assert.equal(magneticTarget(0.5, 1).detent, 1);
+  assert.equal(magneticTarget(0.43, 1).detent, 0);
+  assert.equal(magneticTarget(-0.57, 0).detent, -1);
+  assert.equal(magneticTarget(-0.5, -1).detent, -1);
+  assert.equal(magneticTarget(-0.43, -1).detent, 0);
+  assert.equal(magneticTarget(50, 0).detent, 6);
+  assert.equal(magneticTarget(-50, 0).detent, -6);
+});
+
+test("one tile completely exits before its opposite-side entry in either direction", () => {
+  const first = BOARD.origin + BOARD.pitch / 2;
+  const last = first + 5 * BOARD.pitch;
+  const rightExit = slidePosition(5, 0.4599);
+  assert.ok(rightExit.x - 32 > BOARD.size);
+  assert.equal(slidePosition(5, 0.5).visible, false);
+  const leftEntry = slidePosition(5, 0.5401);
+  assert.ok(leftEntry.x + 32 < 0);
+  assert.equal(slidePosition(5, 1).x, first);
+  assert.ok(slidePosition(0, -0.4599).x + 32 < 0);
+  assert.equal(slidePosition(0, -0.5).visible, false);
+  assert.ok(slidePosition(0, -0.5401).x - 32 > BOARD.size);
+  assert.equal(slidePosition(0, -1).x, last);
+});
+
+test("single-instance transit is reversible and joins every committed cell without a pop", () => {
+  for (let column = 0; column < 6; column++)
+    for (let count = -18; count <= 18; count++) {
+      const p = slidePosition(column, count);
+      const expected = (((column + count) % 6) + 6) % 6;
+      assert.equal(p.visible, true);
+      assert.equal(p.x, BOARD.origin + (expected + 0.5) * BOARD.pitch);
+      const a = slidePosition(column, count - 1e-6),
+        b = slidePosition(column, count + 1e-6);
+      assert.ok(Math.abs(a.x - p.x) < 0.001);
+      assert.ok(Math.abs(b.x - p.x) < 0.001);
+    }
 });

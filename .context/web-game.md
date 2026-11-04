@@ -30,3 +30,6 @@
 - Turn buttons show pressed/queued state; hint/undo reflect busy/availability. Added visible HINT/UNDO/RESET labels and larger utility hit areas, mute slash, named dialogs and Z help.
 - Match tiles briefly highlight before shrinking; score pop moved above grid and reduced to avoid covering play. No landing shake. Flick projection capped to one extra cell to prevent accidental full-loop gestures.
 - Browser checked a hinted 30-point match followed by Undo restoring 0, 320×568 fitting without overflow, reset dialog focused on Keep playing. Landscape fit adjusted from 79svh to 77svh after a 2px overflow at 844×390.
+
+## Latest interaction correction
+- Magnetic row detents and sequential single-instance gutter transit supersede prior flick/duplicate-wrap behavior. See `.context/magnetic-wrap.md`. Current suite is 14 tests.
