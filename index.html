@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#171d25" />
+    <meta name="description" content="Slide. Turn. Match." />
+    <title>SHIFT</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main class="game">
+      <div class="cabinet">
+        <header class="marquee">
+          <div class="wordmark">
+            <svg class="logo" viewBox="0 0 29 7" role="img" aria-label="SHIFT">
+              <g fill="currentColor">
+                <rect x="0" y="0" width="1" height="1" />
+                <rect x="1" y="0" width="1" height="1" />
+                <rect x="2" y="0" width="1" height="1" />
+                <rect x="3" y="0" width="1" height="1" />
+                <rect x="4" y="0" width="1" height="1" />
+                <rect x="0" y="1" width="1" height="1" />
+                <rect x="0" y="2" width="1" height="1" />
+                <rect x="0" y="3" width="1" height="1" />
+                <rect x="1" y="3" width="1" height="1" />
+                <rect x="2" y="3" width="1" height="1" />
+                <rect x="3" y="3" width="1" height="1" />
+                <rect x="4" y="3" width="1" height="1" />
+                <rect x="4" y="4" width="1" height="1" />
+                <rect x="4" y="5" width="1" height="1" />
+                <rect x="0" y="6" width="1" height="1" />
+                <rect x="1" y="6" width="1" height="1" />
+                <rect x="2" y="6" width="1" height="1" />
+                <rect x="3" y="6" width="1" height="1" />
+                <rect x="4" y="6" width="1" height="1" />
+                <rect x="6" y="0" width="1" height="1" />
+                <rect x="10" y="0" width="1" height="1" />
+                <rect x="6" y="1" width="1" height="1" />
+                <rect x="10" y="1" width="1" height="1" />
+                <rect x="6" y="2" width="1" height="1" />
+                <rect x="10" y="2" width="1" height="1" />
+                <rect x="6" y="3" width="1" height="1" />
+                <rect x="7" y="3" width="1" height="1" />
+                <rect x="8" y="3" width="1" height="1" />
+                <rect x="9" y="3" width="1" height="1" />
+                <rect x="10" y="3" width="1" height="1" />
+                <rect x="6" y="4" width="1" height="1" />
+                <rect x="10" y="4" width="1" height="1" />
+                <rect x="6" y="5" width="1" height="1" />
+                <rect x="10" y="5" width="1" height="1" />
+                <rect x="6" y="6" width="1" height="1" />
+                <rect x="10" y="6" width="1" height="1" />
+                <rect x="12" y="0" width="1" height="1" />
+                <rect x="13" y="0" width="1" height="1" />
+                <rect x="14" y="0" width="1" height="1" />
+                <rect x="15" y="0" width="1" height="1" />
+                <rect x="16" y="0" width="1" height="1" />
+                <rect x="14" y="1" width="1" height="1" />
+                <rect x="14" y="2" width="1" height="1" />
+                <rect x="14" y="3" width="1" height="1" />
+                <rect x="14" y="4" width="1" height="1" />
+                <rect x="14" y="5" width="1" height="1" />
+                <rect x="12" y="6" width="1" height="1" />
+                <rect x="13" y="6" width="1" height="1" />
+                <rect x="14" y="6" width="1" height="1" />
+                <rect x="15" y="6" width="1" height="1" />
+                <rect x="16" y="6" width="1" height="1" />
+                <rect x="18" y="0" width="1" height="1" />
+                <rect x="19" y="0" width="1" height="1" />
+                <rect x="20" y="0" width="1" height="1" />
+                <rect x="21" y="0" width="1" height="1" />
+                <rect x="22" y="0" width="1" height="1" />
+                <rect x="18" y="1" width="1" height="1" />
+                <rect x="18" y="2" width="1" height="1" />
+                <rect x="18" y="3" width="1" height="1" />
+                <rect x="19" y="3" width="1" height="1" />
+                <rect x="20" y="3" width="1" height="1" />
+                <rect x="21" y="3" width="1" height="1" />
+                <rect x="18" y="4" width="1" height="1" />
+                <rect x="18" y="5" width="1" height="1" />
+                <rect x="18" y="6" width="1" height="1" />
+                <rect x="24" y="0" width="1" height="1" />
+                <rect x="25" y="0" width="1" height="1" />
+                <rect x="26" y="0" width="1" height="1" />
+                <rect x="27" y="0" width="1" height="1" />
+                <rect x="28" y="0" width="1" height="1" />
+                <rect x="26" y="1" width="1" height="1" />
+                <rect x="26" y="2" width="1" height="1" />
+                <rect x="26" y="3" width="1" height="1" />
+                <rect x="26" y="4" width="1" height="1" />
+                <rect x="26" y="5" width="1" height="1" />
+                <rect x="26" y="6" width="1" height="1" />
+              </g>
+            </svg>
+            <div class="logo-stripes"><i></i><i></i><i></i></div>
+          </div>
+          <div class="tools">
+            <button
+              id="sound"
+              aria-label="Enable sound"
+              aria-pressed="false"
+              title="Sound"
+            >
+              <svg viewBox="0 0 24 24">
+                <path d="M4 10h4l5-4v12l-5-4H4zM17 9q4 3 0 6" />
+                <path class="mute-strike" d="M4 4l16 16" />
+              </svg>
+            </button>
+            <button
+              id="fullscreen"
+              aria-label="Enter fullscreen"
+              title="Fullscreen"
+            >
+              <svg viewBox="0 0 24 24">
+                <path d="M8 4H4v4m12-4h4v4M4 16v4h4m12-4v4h-4" />
+              </svg>
+            </button>
+            <button id="help" aria-label="How to play" title="How to play">
+              ?
+            </button>
+          </div>
+        </header>
+        <section class="play-area" aria-label="Shift puzzle">
+          <div class="screen">
+            <div class="scoreboard">
+              <div><span>SCORE</span><strong id="score">0</strong></div>
+              <div class="best">
+                <span>HI</span><strong id="best">0</strong>
+              </div>
+            </div>
+            <div class="stage">
+              <div class="board-shell">
+                <canvas
+                  id="board"
+                  tabindex="0"
+                  role="application"
+                  aria-label="Six rows. Drag a row to shift. Q and E turn. Up and down select a row, A and D shift it. H gives a hint. Z undoes the last move."
+                ></canvas>
+              </div>
+              <div id="combo" class="combo" aria-hidden="true"></div>
+            </div>
+            <div class="screen-bottom">
+              <span id="cue">↔ DRAG TO SHIFT</span
+              ><span class="power-led" aria-hidden="true"></span>
+            </div>
+          </div>
+          <div class="control-panel">
+            <div class="control-group">
+              <button
+                id="rotate-left"
+                class="turn-button"
+                aria-label="Turn counterclockwise"
+              >
+                <svg viewBox="0 0 48 48">
+                  <path d="M12 18a15 15 0 1 1-1 17M12 7v11h11" />
+                </svg></button
+              ><kbd>Q</kbd>
+            </div>
+            <div class="center-controls">
+              <div class="speaker" aria-hidden="true">
+                <i></i><i></i><i></i><i></i><i></i>
+              </div>
+              <div class="bottom-tools">
+                <button id="hint" aria-label="Hint" title="Hint · H">
+                  <span aria-hidden="true">✦</span><small>HINT</small></button
+                ><button
+                  id="undo"
+                  aria-label="Undo last move"
+                  title="Undo · Z"
+                  disabled
+                >
+                  <span aria-hidden="true">↶</span><small>UNDO</small></button
+                ><button id="restart" aria-label="New game" title="New game">
+                  <span aria-hidden="true">↺</span><small>RESET</small>
+                </button>
+              </div>
+            </div>
+            <div class="control-group">
+              <button
+                id="rotate-right"
+                class="turn-button"
+                aria-label="Turn clockwise"
+              >
+                <svg viewBox="0 0 48 48">
+                  <path d="M36 18a15 15 0 1 0 1 17M36 7v11H25" />
+                </svg></button
+              ><kbd>E</kbd>
+            </div>
+          </div>
+          <span id="status" class="sr-only" role="status"></span>
+        </section>
+        <i class="case-screw left" aria-hidden="true"></i
+        ><i class="case-screw right" aria-hidden="true"></i>
+      </div>
+    </main>
+    <dialog id="help-dialog" aria-labelledby="help-title">
+      <button class="close-dialog" aria-label="Close">×</button>
+      <h2 id="help-title">Slide. Turn. Match.</h2>
+      <div class="instructions">
+        <div>
+          <b>↔</b>
+          <p>Slide a row. It wraps.</p>
+        </div>
+        <div>
+          <b>↻</b>
+          <p>Turn the cartridge. Columns become rows.</p>
+        </div>
+        <div>
+          <b>● ● ●</b>
+          <p>Connect 3. Chain them for more points.</p>
+        </div>
+      </div>
+      <p class="keys">
+        Q / E to turn · ↑ / ↓ to select · A / D to slide · Z to undo
+      </p>
+      <button class="primary close-help">PLAY</button>
+    </dialog>
+    <dialog id="restart-dialog" aria-labelledby="restart-title">
+      <h2 id="restart-title">New game?</h2>
+      <p>Your best score stays.</p>
+      <button id="confirm-restart" class="primary">RESTART</button
+      ><button class="cancel" autofocus>Keep playing</button>
+    </dialog>
+    <script type="module" src="./src/game.js"></script>
+  </body>
+</html>
