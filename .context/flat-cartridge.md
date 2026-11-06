@@ -37,3 +37,5 @@
 - Fixed a missing tile-fit calculation that stopped the render loop before drawing the first tile. Verified the board in-browser at rest and after a clockwise turn. Added a renderer regression test for idle and turn frames.
 
 - Tile silhouettes are square at 64 units on a 72-unit pitch. The uniform well gives both grid axes the same gutter width.
+
+- Board polish adds a recessed tray lip, thin highlights on the cartridge and card faces, and a darker gold glyph for contrast.

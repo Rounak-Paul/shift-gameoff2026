@@ -3,7 +3,7 @@ import { BOARD, turnScale, slidePosition } from "./board.js";
 
 export const COLORS = [
   "#bd573e",
-  "#ae8325",
+  "#967019",
   "#547646",
   "#2b7e7b",
   "#52689c",
@@ -56,7 +56,7 @@ function tile(
   ctx.globalAlpha = alpha;
   ctx.fillStyle = "#0c242a";
   rect(ctx, -TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE, 4);
-  ctx.fillStyle = "#a8ad92";
+  ctx.fillStyle = "#9e9f83";
   rect(ctx, -31, -30, 62, 61, 3);
   const finish = ctx.createLinearGradient(0, -31, 0, 27);
   finish.addColorStop(0, selected ? "#f5e4b9" : "#eee5c8");
@@ -66,6 +66,8 @@ function tile(
   ctx.strokeStyle = "#fbf0d3b3";
   ctx.lineWidth = 1;
   ctx.stroke();
+  ctx.fillStyle = "#fff7de65";
+  ctx.fillRect(-26, -29, 52, 1);
   ctx.fillStyle = "#b4b498";
   ctx.fillRect(-27, 25, 54, 1);
   if (highlight) {
@@ -91,8 +93,14 @@ function cartridge(ctx) {
   ctx.strokeStyle = "#cbd3ae7a";
   ctx.lineWidth = 1;
   ctx.stroke();
+  ctx.fillStyle = "#a6b29a70";
+  ctx.fillRect(77, 70, 446, 1);
+  ctx.fillStyle = "#122a31";
+  ctx.fillRect(77, 529, 446, 1);
+  ctx.fillStyle = "#0a1d25";
+  rect(ctx, 76, 76, 448, 448, 3);
   ctx.fillStyle = "#102a31";
-  rect(ctx, 78, 78, 444, 444, 2);
+  rect(ctx, 78, 79, 444, 443, 2);
   for (const x of [73, 527])
     for (const y of [73, 527]) {
       ctx.fillStyle = "#122b30";
