@@ -26,6 +26,8 @@ let grid,
 let offset = 0,
   velocity = 0,
   target = 0,
+  keyboardShift = false,
+  keyboardShiftAge = 0,
   angle = 0,
   spin = 0,
   direction = 1,
@@ -332,12 +334,11 @@ function shiftRow(count) {
   offset = 0;
   velocity = 0;
   target = count * cell;
+  keyboardShift = true;
+  keyboardShiftAge = 0;
   tickCell = 0;
   mode = "settle";
-  arrival = false;
   hintUntil = 0;
-
-  emit("grab");
 }
 
 /** Converts a client pointer coordinate to a canvas-relative location. */
@@ -354,9 +355,9 @@ function point(event) {
 function release(event, cancel = false) {
   if (!drag || event.pointerId !== pointerId) return;
   target = cancel ? 0 : drag.detent * cell;
+  keyboardShift = false;
   drag = null;
   mode = "settle";
-  arrival = false;
   if (canvas.hasPointerCapture(pointerId))
     canvas.releasePointerCapture(pointerId);
   pointerId = null;
@@ -384,8 +385,6 @@ canvas.addEventListener("pointerdown", (event) => {
   canvas.setPointerCapture(pointerId);
   drag = { start: p.x, last: p.x, base: 0, raw: 0, detent: 0, target: 0 };
   hintUntil = 0;
-
-  emit("grab");
 });
 canvas.addEventListener("pointermove", (event) => {
   const p = point(event);
@@ -553,15 +552,20 @@ function frame(time) {
       [offset, velocity] = spring(offset, velocity, drag.target, dt);
       ticks();
     } else if (mode === "settle") {
-      [offset, velocity] = spring(offset, velocity, target, dt);
-      ticks();
-      if (!arrival && Math.abs(target - offset) < cell * 0.02) {
-        arrival = true;
-        emit("thunk");
+      if (keyboardShift && keyboardShiftAge < 0.045) {
+        keyboardShiftAge += dt;
+        const preload = Math.min(1, keyboardShiftAge / 0.045);
+        offset = target * 0.1 * preload;
+      } else {
+        const settleTime = keyboardShift ? dt * 1.25 : dt;
+        [offset, velocity] = spring(offset, velocity, target, settleTime);
       }
+      ticks();
       if (
-        Math.abs(target - offset) < cell * 0.004 &&
-        Math.abs(velocity) < cell * 0.05
+        keyboardShift
+          ? Math.abs(target - offset) < cell * 0.02
+          : Math.abs(target - offset) < cell * 0.004 &&
+            Math.abs(velocity) < cell * 0.05
       ) {
         const count = Math.round(target / cell);
         grid[row] = shifted(grid[row], count);

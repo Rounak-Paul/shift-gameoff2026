@@ -7,7 +7,7 @@ export class ShiftAudio {
     this.buffers = new Map();
     this.lastTick = 0;
     this.sources = new Set();
-    for (const name of ["grab", "tick", "thunk", "whoosh", "match", "select"])
+    for (const name of ["tick", "thunk", "whoosh", "match", "select"])
       events.addEventListener(name, (e) => this.play(name, e.detail));
     document.addEventListener("visibilitychange", () => {
       if (!this.context) return;
@@ -29,7 +29,7 @@ export class ShiftAudio {
       this.master.gain.value = 0.48;
       this.master.connect(this.context.destination);
       this.loading = Promise.all(
-        ["grab", "tick", "thunk", "whoosh"].map(async (name) => {
+        ["tick", "thunk", "whoosh"].map(async (name) => {
           try {
             const response = await fetch(
               new URL(`../assets/audio/${name}.wav`, import.meta.url),

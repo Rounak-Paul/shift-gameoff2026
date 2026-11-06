@@ -15,3 +15,7 @@
 - 14 Node tests pass, including hysteresis/jitter/clamps, full exit before entry in both directions, and periodic continuity across -18..18 cell offsets.
 - Local browser drag produced one selected detent; settled normally, with no warning/error logs at the check. Real touch hardware remains unverified.
 - Build regenerates dist and itch ZIP. No commits/pushes.
+
+- A/D uses a 45 ms preload to mimic drag tension, then releases through the detent spring and commits at first arrival. This supersedes the uniformly accelerated keyboard shift.
+
+- Row pick and release sounds were removed. Detent clicks provide row movement feedback.

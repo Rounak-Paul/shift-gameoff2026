@@ -9,6 +9,8 @@ export const COLORS = [
   "#52689c",
   "#a25477",
 ];
+const TILE_SIZE = 64;
+
 const GLYPHS = [
   ["0001000", "0101010", "0011100", "1111111", "0011100", "0101010", "0001000"],
   ["0001000", "0011100", "0111110", "1111111", "0111110", "0011100", "0001000"],
@@ -53,25 +55,25 @@ function tile(
   ctx.scale(scale, scale);
   ctx.globalAlpha = alpha;
   ctx.fillStyle = "#0c242a";
-  rect(ctx, -32, -29, 64, 66, 4);
+  rect(ctx, -TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE, 4);
   ctx.fillStyle = "#a8ad92";
-  rect(ctx, -31, -30, 62, 65, 3);
-  const finish = ctx.createLinearGradient(0, -31, 0, 30);
+  rect(ctx, -31, -30, 62, 61, 3);
+  const finish = ctx.createLinearGradient(0, -31, 0, 27);
   finish.addColorStop(0, selected ? "#f5e4b9" : "#eee5c8");
   finish.addColorStop(1, selected ? "#dfc99b" : "#d5d0ae");
   ctx.fillStyle = finish;
-  rect(ctx, -31, -33, 62, 63, 3);
+  rect(ctx, -31, -31, 62, 58, 3);
   ctx.strokeStyle = "#fbf0d3b3";
   ctx.lineWidth = 1;
   ctx.stroke();
   ctx.fillStyle = "#b4b498";
-  ctx.fillRect(-27, 28, 54, 1);
+  ctx.fillRect(-27, 25, 54, 1);
   if (highlight) {
     ctx.strokeStyle = "#fff4b0";
     ctx.lineWidth = 3;
-    ctx.strokeRect(-29, -31, 58, 59);
+    ctx.strokeRect(-29, -29, 58, 54);
   }
-  ctx.translate(0, -1);
+  ctx.translate(0, -2);
   glyph(ctx, kind);
   ctx.restore();
 }
@@ -91,12 +93,6 @@ function cartridge(ctx) {
   ctx.stroke();
   ctx.fillStyle = "#102a31";
   rect(ctx, 78, 78, 444, 444, 2);
-  for (let r = 0; r < 6; r++) {
-    ctx.fillStyle = "#071e27";
-    rect(ctx, 80, BOARD.origin + r * BOARD.pitch + 2, 440, 68, 1);
-    ctx.fillStyle = "#a4b39826";
-    ctx.fillRect(81, BOARD.origin + r * BOARD.pitch, 438, 1);
-  }
   for (const x of [73, 527])
     for (const y of [73, 527]) {
       ctx.fillStyle = "#122b30";
@@ -200,7 +196,7 @@ export function renderBoard(ctx, state) {
   // Keep upright tiles within the spacing of the turning grid.
   const tileFit = Math.min(
     1,
-    BOARD.pitch / Math.max(64 * cosine + 70 * sine, 64 * sine + 70 * cosine),
+    BOARD.pitch / (TILE_SIZE * (cosine + sine)),
   );
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, size, size);
