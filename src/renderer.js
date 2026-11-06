@@ -25,17 +25,14 @@ function rect(ctx, x, y, width, height, radius = 2) {
   ctx.fill();
 }
 
-/** Draws a printed seven-pixel symbol, counter-rotating it to remain legible during turns. */
-function glyph(ctx, kind, angle) {
-  ctx.save();
-  ctx.rotate(-angle);
+/** Draws the tile’s printed seven-pixel symbol. */
+function glyph(ctx, kind) {
   ctx.fillStyle = COLORS[kind];
   const pixel = 5;
   for (let y = 0; y < 7; y++)
     for (let x = 0; x < 7; x++)
       if (GLYPHS[kind][y][x] === "1")
         ctx.fillRect((x - 3.5) * pixel, (y - 3.5) * pixel, pixel, pixel);
-  ctx.restore();
 }
 
 /** Draws one shallow bakelite tile at x/y with its printed symbol and face bevel. */
@@ -52,6 +49,7 @@ function tile(
 ) {
   ctx.save();
   ctx.translate(x, y);
+  ctx.rotate(-angle);
   ctx.scale(scale, scale);
   ctx.globalAlpha = alpha;
   ctx.fillStyle = "#0c242a";
@@ -59,8 +57,8 @@ function tile(
   ctx.fillStyle = "#a8ad92";
   rect(ctx, -31, -30, 62, 65, 3);
   const finish = ctx.createLinearGradient(0, -31, 0, 30);
-  finish.addColorStop(0, selected ? "#f4e9c8" : "#eee5c8");
-  finish.addColorStop(1, selected ? "#ddd1a7" : "#d5d0ae");
+  finish.addColorStop(0, selected ? "#f5e4b9" : "#eee5c8");
+  finish.addColorStop(1, selected ? "#dfc99b" : "#d5d0ae");
   ctx.fillStyle = finish;
   rect(ctx, -31, -33, 62, 63, 3);
   ctx.strokeStyle = "#fbf0d3b3";
@@ -74,7 +72,7 @@ function tile(
     ctx.strokeRect(-29, -31, 58, 59);
   }
   ctx.translate(0, -1);
-  glyph(ctx, kind, angle);
+  glyph(ctx, kind);
   ctx.restore();
 }
 
@@ -197,6 +195,13 @@ export function renderBoard(ctx, state) {
   } = state;
   const units = size / BOARD.size,
     rotationScale = turnScale(angle);
+  const cosine = Math.abs(Math.cos(angle));
+  const sine = Math.abs(Math.sin(angle));
+  // Keep upright tiles within the spacing of the turning grid.
+  const tileFit = Math.min(
+    1,
+    BOARD.pitch / Math.max(64 * cosine + 70 * sine, 64 * sine + 70 * cosine),
+  );
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, size, size);
   ctx.save();
@@ -224,9 +229,11 @@ export function renderBoard(ctx, state) {
     );
   }
   ctx.save();
-  ctx.beginPath();
-  ctx.rect(0, BOARD.origin, BOARD.size, BOARD.pitch * SIZE + 4);
-  ctx.clip();
+  if (mode !== "rotate") {
+    ctx.beginPath();
+    ctx.rect(0, BOARD.origin, BOARD.size, BOARD.pitch * SIZE + 4);
+    ctx.clip();
+  }
   for (let r = 0; r < SIZE; r++)
     for (let c = 0; c < SIZE; c++) {
       let u = c + 0.5,
@@ -257,10 +264,10 @@ export function renderBoard(ctx, state) {
         position.x,
         y,
         angle,
-        scale,
+        scale * tileFit,
         alpha,
         mode === "clear" && clearCells.includes(r * SIZE + c),
-        r === focusRow && mode !== "rotate",
+        r === visibleFocus,
       );
     }
   ctx.restore();

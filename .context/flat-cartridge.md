@@ -3,9 +3,11 @@
 - Latest user instruction: forget the cylinder, redesign. Preserve the approved console; remove all curved geometry, caps and reel-window framing.
 - Flat 6×6 cartridge: 600-unit canvas, center 300, grid origin 84, pitch 72. Outer frame x/y65..535 with corner fasteners; shallow cream tiles, colored printed pixel glyphs and horizontal row tracks.
 - Dragging wraps tiles through side edges of a clipped rectangular grid. Hover/selection uses inset selector shoes on both cartridge rails, three small illuminated segments, warm brass track edges, and a subtle warmer tile face. Hover is muted; selected/dragged/hinted rows get brighter amber accents. No up/down motion or landing shake.
-- Q/E rotates the complete square cartridge. Pixel glyphs counter-rotate to remain upright; committed tile positions agree with the rotated logical matrix. A scale factor 1/(1+.16*abs(sin(2a))) keeps corners visible at diagonal orientations.
+- Q/E rotates the complete square cartridge. Whole tiles counter-rotate to remain upright; committed tile positions agree with the rotated logical matrix. A scale factor 1/(1+.16*abs(sin(2a))) keeps corners visible at diagonal orientations.
 - `src/board.js` owns geometry; `src/renderer.js` owns visuals; `src/game.js` owns input/state. Removed obsolete `src/drum.js` and cylinder tests.
 - Rules and original Quasar feedback sounds unchanged. Shape/color pairing supports distinguishing all six tile kinds.
+
+- Upright tile faces shrink temporarily to clear their neighbors during diagonal turns and return to full size at either detent.
 
 ## UI/UX pass
 - Undo tracks up to 20 completed moves, including cascades. Contextual display cues and directional hints replace persistent copy. Selected rows use mechanical inset rail markers; hint includes direction/steps. Match flash holds briefly before shrink, score feedback sits above tiles. Busy/pressed/queued controls are explicit.
@@ -29,3 +31,7 @@
 
 ## Magnetic handoff
 - User explicitly requires the outgoing tile to be gone before opposite-side entry, and wants threshold-triggered magnetic motion. Replaced continuous resisted pointer offsets with a spring-driven hysteretic detent; replaced duplicate wrap rendering with a single reversible transit. No flick projection beyond the chosen detent. See `.context/magnetic-wrap.md`.
+
+- Strengthened the highlighted row’s warm card-face tint. Cards and gutters use the same visible focus row.
+
+- Fixed a missing tile-fit calculation that stopped the render loop before drawing the first tile. Verified the board in-browser at rest and after a clockwise turn. Added a renderer regression test for idle and turn frames.

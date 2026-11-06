@@ -138,7 +138,7 @@
                   id="board"
                   tabindex="0"
                   role="application"
-                  aria-label="Six rows. Drag a row to shift. Q and E turn. Up and down select a row, A and D shift it. H gives a hint. Z undoes the last move."
+                  aria-label="Six rows. Drag a row to shift. Q and E turn. W and S or Up and Down select a row, A and D shift it. H gives a hint."
                 ></canvas>
               </div>
               <div id="combo" class="combo" aria-hidden="true"></div>
@@ -155,8 +155,9 @@
                 class="turn-button"
                 aria-label="Turn counterclockwise"
               >
-                <svg viewBox="0 0 48 48">
-                  <path d="M12 18a15 15 0 1 1-1 17M12 7v11h11" />
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M4 13a8 8 0 1 0 8-8" />
+                  <path class="turn-arrowhead" d="M7 5l6-3.5v7z" />
                 </svg></button
               ><kbd>Q</kbd>
             </div>
@@ -167,13 +168,6 @@
               <div class="bottom-tools">
                 <button id="hint" aria-label="Hint" title="Hint · H">
                   <span aria-hidden="true">✦</span><small>HINT</small></button
-                ><button
-                  id="undo"
-                  aria-label="Undo last move"
-                  title="Undo · Z"
-                  disabled
-                >
-                  <span aria-hidden="true">↶</span><small>UNDO</small></button
                 ><button id="restart" aria-label="New game" title="New game">
                   <span aria-hidden="true">↺</span><small>RESET</small>
                 </button>
@@ -185,8 +179,9 @@
                 class="turn-button"
                 aria-label="Turn clockwise"
               >
-                <svg viewBox="0 0 48 48">
-                  <path d="M36 18a15 15 0 1 0 1 17M36 7v11H25" />
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M20 13a8 8 0 1 1-8-8" />
+                  <path class="turn-arrowhead" d="M17 5l-6-3.5v7z" />
                 </svg></button
               ><kbd>E</kbd>
             </div>
@@ -215,7 +210,7 @@
         </div>
       </div>
       <p class="keys">
-        Q / E to turn · ↑ / ↓ to select · A / D to slide · Z to undo
+        Q / E to turn · W / S or ↑ / ↓ to select · A / D to slide
       </p>
       <button class="primary close-help">PLAY</button>
     </dialog>

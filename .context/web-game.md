@@ -17,7 +17,7 @@
 - `src/game.js`: interaction state machine idle/drag/settle/rotate/clear/fall, DOM interface, feedback events.
 - `src/board.js`: flat projection and pointer mapping. `src/renderer.js`: raised printed tiles, horizontal row tracks, square cartridge frame and quarter-turns. Detailed geometry in `.context/flat-cartridge.md`.
 - `src/audio.js`: event observer for original WAV samples plus short match tones. Unlocks on first input unless muted, pauses when hidden. Audio/storage/fullscreen failures degrade safely.
-- Pointer capture; cancel/blur/lost capture settle safely. Q/E or Left/Right rotates; Up/Down selects row; A/D shifts; H hints; Z undoes. No timer or penalties.
+- Pointer capture; cancel/blur/lost capture settle safely. Q/E or Left/Right rotates; W/S or Up/Down selects a row; A/D shifts; H hints. No timer or penalties.
 
 ## Validation / delivery
 - 11 deterministic Node tests: rules, initial no-run boards, gravity, cascades, hints, flat projection inversion, turn continuity, both-turn framing bounds, and outside input.
@@ -33,3 +33,9 @@
 
 ## Latest interaction correction
 - Magnetic row detents and sequential single-instance gutter transit supersede prior flick/duplicate-wrap behavior. See `.context/magnetic-wrap.md`. Current suite is 14 tests.
+
+- Removed Undo and its Z shortcut, along with the move history. Q/E arrow artwork uses mirrored paths with centered painted bounds.
+
+- Turn icons use mirrored circular arcs and solid tangent arrowheads in a shared 24-unit view box. Replaced the earlier hook-shaped arrowheads after visual review.
+
+- W/S and Up/Down row selection emit a short synthesized click through the existing audio mute and visibility handling.

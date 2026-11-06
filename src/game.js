@@ -40,8 +40,6 @@ let drag = null,
   hintRow = -1,
   hintUntil = 0;
 let hintCount = 0,
-  pendingMove = null,
-  history = [],
   hasShifted = false,
   hasTurned = false;
 let cueMessage = "",
@@ -78,40 +76,6 @@ function status(message) {
   $("status").textContent = message;
 }
 
-/** Captures a completed position so a whole move and its cascades can be undone. */
-function snapshot() {
-  return { grid: grid.map((row) => [...row]), score, selected };
-}
-
-/** Stores one previous position, bounded to the latest twenty player actions. */
-function rememberMove(position) {
-  history.push(position);
-  if (history.length > 20) history.shift();
-}
-
-/** Restores the previous completed position; personal best remains a lifetime record. */
-function undo() {
-  if (mode !== "idle" || !history.length) return;
-  const previous = history.pop();
-  grid = previous.grid;
-  score = shownScore = previous.score;
-  selected = previous.selected;
-  offset = velocity = angle = spin = 0;
-  queued = pendingMove = null;
-  particles = [];
-  clearCells = [];
-  chain = 0;
-  hintUntil = 0;
-  hover = -1;
-  $("combo").classList.remove("show");
-  $("combo").replaceChildren();
-  updateStats();
-  emit("tick");
-  showCue("MOVE UNDONE");
-  status("Last move undone.");
-  canvas.focus({ preventScroll: true });
-}
-
 /** Shows a short display message without adding persistent instructions around the board. */
 function showCue(message, duration = 2400) {
   cueMessage = message;
@@ -138,10 +102,9 @@ function updateInterface(time) {
     lastCue = message;
   }
   $("cue").classList.toggle("hint-cue", time < hintUntil);
-  const controls = `${mode}/${queued}/${history.length}/${direction}`;
+  const controls = `${mode}/${queued}/${direction}`;
   if (controls !== lastControls) {
     $("hint").disabled = mode !== "idle";
-    $("undo").disabled = mode !== "idle" || !history.length;
     for (const [id, turn] of [
       ["rotate-left", -1],
       ["rotate-right", 1],
@@ -190,8 +153,6 @@ function reset() {
   $("combo").classList.remove("show");
   $("combo").replaceChildren();
   status("Drag a row. Match three.");
-  history = [];
-  pendingMove = null;
   cueUntil = 0;
   lastControls = "";
   updateStats();
@@ -352,8 +313,6 @@ function rotate(turn) {
     return;
   }
   hintUntil = 0;
-  pendingMove = null;
-  rememberMove(snapshot());
   mode = "rotate";
   direction = turn;
   angle = 0;
@@ -370,7 +329,6 @@ function shiftRow(count) {
   hover = -1;
   if (selected < 0) selected = 0;
   row = selected;
-  pendingMove = snapshot();
   offset = 0;
   velocity = 0;
   target = count * cell;
@@ -419,7 +377,6 @@ canvas.addEventListener("pointerdown", (event) => {
   if (!p.inside) return;
   row = Math.floor(p.y / cell);
   selected = row;
-  pendingMove = snapshot();
   mode = "drag";
   offset = velocity = 0;
   tickCell = 0;
@@ -475,10 +432,11 @@ window.addEventListener("keydown", (event) => {
       "arrowright",
       "arrowup",
       "arrowdown",
+      "w",
+      "s",
       "a",
       "d",
       "h",
-      "z",
     ].includes(key)
   )
     return;
@@ -487,14 +445,15 @@ window.addEventListener("keydown", (event) => {
     return;
   if (key === "q" || key === "arrowleft") rotate(-1);
   else if (key === "e" || key === "arrowright") rotate(1);
-  else if (key === "arrowup" || key === "arrowdown") {
-    selected = selected < 0 ? 0 : wrap(selected + (key === "arrowup" ? -1 : 1));
+  else if (["arrowup", "arrowdown", "w", "s"].includes(key)) {
+    const step = key === "w" || key === "arrowup" ? -1 : 1;
+    selected = selected < 0 ? 0 : wrap(selected + step);
+    emit("select");
     hover = -1;
     hintUntil = 0;
   } else if (key === "a" || key === "d") {
     shiftRow(key === "a" ? -1 : 1);
-  } else if (key === "z") undo();
-  else showHint();
+  } else showHint();
 });
 
 /** Finds and highlights a productive row, turning the board first if needed. */
@@ -519,7 +478,6 @@ function showHint() {
 $("rotate-left").addEventListener("click", () => rotate(-1));
 $("rotate-right").addEventListener("click", () => rotate(1));
 $("hint").addEventListener("click", showHint);
-$("undo").addEventListener("click", undo);
 /** Applies audio preference and reflects the actual supported state in its control. */
 async function setSound(enabled) {
   const active = await audio.setEnabled(enabled);
@@ -606,14 +564,11 @@ function frame(time) {
         Math.abs(velocity) < cell * 0.05
       ) {
         const count = Math.round(target / cell);
-        const previous = pendingMove;
-        pendingMove = null;
         grid[row] = shifted(grid[row], count);
         offset = 0;
         velocity = 0;
         mode = "idle";
         if (wrap(count) !== 0) {
-          if (previous) rememberMove(previous);
           hasShifted = true;
           resolve();
         } else if (queued) {

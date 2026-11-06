@@ -7,7 +7,7 @@ export class ShiftAudio {
     this.buffers = new Map();
     this.lastTick = 0;
     this.sources = new Set();
-    for (const name of ["grab", "tick", "thunk", "whoosh", "match"])
+    for (const name of ["grab", "tick", "thunk", "whoosh", "match", "select"])
       events.addEventListener(name, (e) => this.play(name, e.detail));
     document.addEventListener("visibilitychange", () => {
       if (!this.context) return;
@@ -65,8 +65,8 @@ export class ShiftAudio {
     return this.enabled;
   }
 
-  /** Plays a brief sine bell at frequency with a decaying gain envelope. */
-  tone(frequency, volume = 0.06, duration = 1.8) {
+  /** Plays a brief sine bell at frequency with a configurable attack and decaying gain envelope. */
+  tone(frequency, volume = 0.06, duration = 1.8, attack = 0.015) {
     if (!this.enabled || !this.context || document.hidden) return;
     const t = this.context.currentTime,
       oscillator = this.context.createOscillator(),
@@ -74,7 +74,7 @@ export class ShiftAudio {
     oscillator.frequency.value = frequency;
     oscillator.type = "sine";
     gain.gain.setValueAtTime(0, t);
-    gain.gain.linearRampToValueAtTime(volume, t + 0.015);
+    gain.gain.linearRampToValueAtTime(volume, t + attack);
     gain.gain.exponentialRampToValueAtTime(0.0001, t + duration);
     oscillator.connect(gain);
     gain.connect(this.master);
@@ -89,6 +89,10 @@ export class ShiftAudio {
   /** Plays an interaction sample, or a cascading match chord, from event detail. */
   play(name, detail = {}) {
     if (!this.enabled || !this.context || document.hidden) return;
+    if (name === "select") {
+      this.tone(760, 0.12, 0.042, 0.001);
+      return;
+    }
     if (name === "match") {
       const multiplier = Math.min(detail.chain || 1, 6);
       [261.63, 329.63, 392].forEach((f) =>

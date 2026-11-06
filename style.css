@@ -270,13 +270,15 @@ canvas:active {
     inset 0 2px #f19d6e;
 }
 .turn-button svg {
-  width: 44px;
-  height: 44px;
-  border-radius: 5px;
-  transition:
-    background 0.15s,
-    color 0.15s;
-  stroke-width: 3;
+  display: block;
+  width: 31px;
+  height: 31px;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.turn-arrowhead {
+  fill: currentColor;
+  stroke: none;
 }
 .turn-button:active {
   box-shadow:

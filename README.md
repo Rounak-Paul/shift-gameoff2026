@@ -22,8 +22,7 @@ Open http://127.0.0.1:5173. The build writes `dist/` and `shift-itch.zip`.
 - Match cascades multiply points: 10 points per tile × chain depth.
 - No timer, move limit, or penalties. Non-matching shifts stay in place.
 - Mouse and touch: drag a row, tap the turn buttons.
-- Keyboard: Q/E or Left/Right turn, Up/Down select a row, A/D shift, H hints, Z undoes.
-- Undo restores the board and score before the last action, including cascades (up to 20 actions). Best score is kept.
+- Keyboard: Q/E or Left/Right turn, W/S or Up/Down select a row, A/D shift, H hints.
 - Hints mark the row, direction, and number of steps on the board and display. Short contextual prompts teach sliding and turning, then clear.
 - Mechanical audio starts on the first interaction; the speaker button mutes it. Audio pauses when hidden.
 
