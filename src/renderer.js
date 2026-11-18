@@ -48,6 +48,7 @@ function tile(
   alpha = 1,
   highlight = false,
   selected = false,
+  marked = false,
 ) {
   ctx.save();
   ctx.translate(x, y);
@@ -56,7 +57,7 @@ function tile(
   ctx.globalAlpha = alpha;
   ctx.fillStyle = "#0c242a";
   rect(ctx, -TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE, 4);
-  ctx.fillStyle = "#9e9f83";
+  ctx.fillStyle = marked ? "#d7a145" : "#9e9f83";
   rect(ctx, -31, -30, 62, 61, 3);
   const finish = ctx.createLinearGradient(0, -31, 0, 27);
   finish.addColorStop(0, selected ? "#f5e4b9" : "#eee5c8");
@@ -70,6 +71,13 @@ function tile(
   ctx.fillRect(-26, -29, 52, 1);
   ctx.fillStyle = "#b4b498";
   ctx.fillRect(-27, 25, 54, 1);
+  if (marked) {
+    ctx.strokeStyle = "#e6b85f";
+    ctx.lineWidth = 3;
+    ctx.strokeRect(-29, -29, 58, 56);
+    ctx.fillStyle = "#edc77a";
+    for (const x of [-27, 24]) ctx.fillRect(x, 20, 3, 3);
+  }
   if (highlight) {
     ctx.strokeStyle = "#fff4b0";
     ctx.lineWidth = 3;
@@ -232,6 +240,12 @@ export function renderBoard(ctx, state) {
       y - 4,
     );
   }
+  if (state.marks) {
+    ctx.fillStyle = "#b58c4566";
+    for (let r = 0; r < SIZE; r++)
+      for (let c = 0; c < SIZE; c++)
+        if (state.marks[r][c]) rect(ctx, BOARD.origin + c * BOARD.pitch + 1, BOARD.origin + r * BOARD.pitch + 1, 70, 70, 3);
+  }
   ctx.save();
   if (mode !== "rotate") {
     ctx.beginPath();
@@ -253,7 +267,7 @@ export function renderBoard(ctx, state) {
         scale = 1 - t * 0.85;
         alpha = 1 - t;
       }
-      if (mode === "fall" && fallDistances) {
+      if (mode === "fall" && fallDistances && !reducedMotion) {
         const t = Math.min(phase / (reducedMotion ? 0.08 : 0.5), 1);
         v -= Math.pow(1 - t, 3) * fallDistances[r][c];
       }
@@ -272,6 +286,7 @@ export function renderBoard(ctx, state) {
         alpha,
         mode === "clear" && clearCells.includes(r * SIZE + c),
         r === visibleFocus,
+        !sliding && Boolean(state.marks?.[r][c]),
       );
     }
   ctx.restore();

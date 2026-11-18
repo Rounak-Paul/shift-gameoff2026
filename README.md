@@ -20,10 +20,16 @@ Open http://127.0.0.1:5173. The build writes `dist/` and `shift-itch.zip`.
 - Match at least three equal colors/shapes in a horizontal or vertical line. Matches do not wrap across board edges.
 - Q/E rotates the flat cartridge a quarter-turn, making columns into rows.
 - Match cascades multiply points: 10 points per tile × chain depth.
-- No timer, move limit, or penalties. Non-matching shifts stay in place.
+- Campaign: 12 progressively unlocked levels with score targets, symbol collection, brass-space clearing, and combined goals. Each committed row slide uses one move, regardless of distance; turns and hints are free. Complete all goals within the move budget. The final move resolves all cascades before deciding the result.
+- Free play: no timer, move limit, or penalties. Non-matching shifts stay in place in both modes.
+- Level retries repeat the starting board and refill sequence. Completed levels unlock the next one and remain replayable. Progress saves locally.
+- Main menu pauses the current attempt and offers Resume during the current session. Reloading keeps completed levels and preferences, then returns to the main menu.
 - Mouse and touch: drag a row, tap the turn buttons.
 - Keyboard: Q/E or Left/Right turn, W/S or Up/Down select a row, A/D shift, H hints.
-- Hints mark the row, direction, and number of steps on the board and display. Short contextual prompts teach sliding and turning, then clear.
+- Hints mark and select the suggested row, direction, and number of steps; A/D in the suggested direction follows the full hinted slide as one move. Short contextual prompts teach sliding, turning, and keyboard row selection, then clear.
+- Escape cancels a held drag, queued turn, or active hint. Help and reset dialogs pause gameplay and return keyboard focus to the board when closed.
+- Reduced-motion preference removes slide/turn spring travel, falling motion, and particles; preference changes apply immediately.
+- Settings: sound effects, volume, device/full/reduced motion, match particles, and fullscreen. Preferences save locally.
 - Mechanical audio starts on the first interaction; the speaker button mutes it. Audio pauses when hidden.
 
 ## itch.io upload
@@ -37,11 +43,14 @@ The game needs a web server; opening `index.html` directly with `file://` does n
 ## Architecture / provenance
 
 - `src/engine.js`: pure board generation, rotation, wrapping shifts, run detection, gravity, hints.
-- `src/game.js`: pointer/keyboard input, animation state machine, DOM interface.
+- `src/game.js`: pointer/keyboard input, animation state machine, and session coordination.
+- `src/shell.js`: main menu, level map/brief, settings, goal HUD, and results; semantic events connect it to gameplay.
+- `src/levels.js`: authored campaign data, seeded random source, and independent level-attempt goal/move tracking.
+- `src/profile.js`: validated, failure-tolerant local preferences and completion storage.
 - `src/renderer.js`: flat cartridge, sliding bakelite tiles, printed pixel glyphs, and turn animation.
 - `src/board.js`: flat board projection, pointer mapping, and turn framing.
 - `src/audio.js`: feedback-event subscriber, Web Audio sample playback, short synthesized match tones.
 - `assets/audio/`: original grab, tick, thunk, and whoosh samples copied from `QuasarEngine/projects/Shift`.
-- `tests/engine.test.js`, `tests/board.test.js`: deterministic rules, cascades, projection, hit testing, and turn continuity tests.
+- `tests/`: deterministic rules, cascades, projection, hit testing, turn continuity, rendering, controller interaction regressions, profile validation, final-move outcomes, and a verified winning sequence for every level.
 
 The original Quasar prototype's 6×6 board, six colors, row wrapping, damped springs, quarter turns, one queued rotation, and four sounds are preserved. Match clearing, gravity, cascading, score, hints, stronger magnetic drag detents, single-instance gutter handoffs, and the retro console presentation extend that prototype.

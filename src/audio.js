@@ -3,6 +3,7 @@ export class ShiftAudio {
   /** Subscribes audio feedback to the board event target. */
   constructor(events) {
     this.enabled = false;
+    this.volume = 0.5;
     this.context = null;
     this.buffers = new Map();
     this.lastTick = 0;
@@ -26,7 +27,7 @@ export class ShiftAudio {
       if (!Context) throw new Error("Web Audio unavailable");
       this.context = new Context();
       this.master = this.context.createGain();
-      this.master.gain.value = 0.48;
+      this.master.gain.value = this.volume * 0.96;
       this.master.connect(this.context.destination);
       this.loading = Promise.all(
         ["tick", "thunk", "whoosh"].map(async (name) => {
@@ -48,6 +49,12 @@ export class ShiftAudio {
       );
     }
     if (this.context.state === "suspended") await this.context.resume();
+  }
+
+  /** Sets normalized effects volume and updates the active gain without restarting samples. */
+  setVolume(volume) {
+    this.volume = Math.max(0, Math.min(1, volume));
+    if (this.master) this.master.gain.setTargetAtTime(this.volume * 0.96, this.context.currentTime, 0.02);
   }
 
   /** Sets audio enabled state, unlocking the context from a user gesture. */

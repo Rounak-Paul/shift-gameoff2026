@@ -39,3 +39,9 @@
 - Turn icons use mirrored circular arcs and solid tangent arrowheads in a shared 24-unit view box. Replaced the earlier hook-shaped arrowheads after visual review.
 
 - W/S and Up/Down row selection emit a short synthesized click through the existing audio mute and visibility handling.
+
+## 2026-11-18 control polish
+- See `.context/control-polish.md` for current input fixes, Escape cancellation, hinted keyboard selection, modal pause/focus, live reduced-motion behavior, and validation. Current suite: 21 passing tests. No changes to rules or approved console/magnetic feel.
+
+## 2026-11-18 menus and campaign
+- Main menu/settings and a 12-level Candy Crush-inspired starter campaign are implemented. See `.context/menus-and-campaign.md` for architecture, objectives, deterministic retry, move rules, persistence, and browser validation. Free play remains. Current suite: 28 tests. Difficulty still needs human playtesting.
