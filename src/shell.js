@@ -9,6 +9,7 @@ export class GameShell extends EventTarget {
     this.profile = profile;
     this.view = "home";
     this.active = false;
+    this.history = [];
     this.pendingLevel = null;
     const actions = {
       "play-levels": "levels", "free-play": "free", "resume-game": "resume",
@@ -20,13 +21,25 @@ export class GameShell extends EventTarget {
     for (const id of ["settings", "menu-settings"])
       document.getElementById(id).addEventListener("click", () => this.dispatchEvent(new CustomEvent("action", { detail: { action: "settings" } })));
     document.getElementById("menu-help").addEventListener("click", () => this.dispatchEvent(new CustomEvent("action", { detail: { action: "help" } })));
-    for (const id of ["close-settings", "settings-done"])
-      document.getElementById(id).addEventListener("click", () => document.getElementById("settings-dialog").close());
+    for (const button of document.querySelectorAll("#close-settings, #settings-done, #cancel-level, #help-view .page-back, #help-view .close-help, #cancel-restart"))
+      button.addEventListener("click", () => this.back());
+    document.getElementById("home-view").addEventListener("keydown", (event) => {
+      if (!["ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)) return;
+      const options = [...document.querySelectorAll(".start-option")].filter((button) => !button.hidden);
+      const index = options.indexOf(document.activeElement);
+      const next = event.key === "Home" ? 0 : event.key === "End" ? options.length - 1
+        : (index + (event.key === "ArrowUp" ? -1 : 1) + options.length) % options.length;
+      event.preventDefault();
+      options[next].focus();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.defaultPrevented || event.key !== "Escape" || this.view === "play" || this.view === "home") return;
+      event.preventDefault();
+      this.back();
+    });
     document.getElementById("begin-level").addEventListener("click", () => {
-      document.getElementById("level-dialog").close();
       this.dispatchEvent(new CustomEvent("action", { detail: { action: "start", id: this.pendingLevel } }));
     });
-    document.getElementById("cancel-level").addEventListener("click", () => document.getElementById("level-dialog").close());
     for (const key of ["sound", "volume", "motion", "particles"]) {
       const input = document.getElementById(`setting-${key}`);
       input.addEventListener(key === "volume" ? "input" : "change", () => {
@@ -50,21 +63,39 @@ export class GameShell extends EventTarget {
   }
 
   /** Switches to home, map, or play while removing hidden controls from keyboard navigation. */
-  show(view) {
+  show(view, keepHistory = false) {
+    if (!keepHistory) this.history = [];
     this.view = view;
-    document.querySelector(".game").classList.toggle("menu-active", view !== "play");
-    document.querySelector(".game").classList.toggle("level-active", view === "play" && Boolean(this.run));
-    for (const name of ["home", "map"])
+    for (const name of ["home", "map", "settings", "help", "intro", "result", "restart"])
       document.getElementById(`${name}-view`).hidden = view !== name;
     document.getElementById("play-view").inert = view !== "play";
     document.getElementById("play-view").style.visibility = view === "play" ? "visible" : "hidden";
     document.querySelector(".control-panel").inert = view !== "play";
-    document.querySelector(".control-panel").style.visibility = view === "play" ? "visible" : "hidden";
+    document.querySelector(".control-panel").style.visibility = "visible";
     document.getElementById("resume-game").hidden = !this.active;
     document.getElementById("campaign-progress").textContent = `${this.profile.completed.length} / ${LEVELS.length} levels cleared`;
     if (view === "map") this.renderMap();
-    const focus = view === "play" ? "board" : view === "map" ? "map-back" : this.active ? "resume-game" : "play-levels";
-    document.getElementById(focus).focus({ preventScroll: true });
+    const focus = { play: "board", map: "map-back", settings: "close-settings", help: "help-title", intro: "begin-level", result: "result-title", restart: "cancel-restart" }[view]
+      || (this.active ? "resume-game" : "play-levels");
+    const element = document.getElementById(focus);
+    if (element.tagName === "H2") element.tabIndex = -1;
+    element.focus({ preventScroll: true });
+    this.dispatchEvent(new Event("viewchange"));
+  }
+
+  /** Opens an in-display page and remembers the current view and focused control. */
+  open(view) {
+    if (view === this.view) return;
+    this.history.push({ view: this.view, focus: document.activeElement });
+    this.show(view, true);
+  }
+
+  /** Returns to the previous display page or its logical parent. */
+  back() {
+    const previous = this.history.pop();
+    this.show(previous?.view || (["intro", "result"].includes(this.view) ? "map" : "home"), true);
+    if (previous?.focus?.isConnected && !previous.focus.closest("[hidden], [inert]"))
+      previous.focus.focus({ preventScroll: true });
   }
 
   /** Rebuilds the numbered level map from completion state; completed levels remain replayable. */
@@ -96,7 +127,7 @@ export class GameShell extends EventTarget {
     document.getElementById("level-tip").textContent = level.tip;
     document.getElementById("level-budget").textContent = `${level.moves} moves · Free turns · No timer`;
     this.dispatchEvent(new CustomEvent("preview", { detail: level }));
-    document.getElementById("level-dialog").showModal();
+    this.show("intro");
   }
 
   /** Renders goals in element using run's progress, optionally including progress bars. */
@@ -123,11 +154,8 @@ export class GameShell extends EventTarget {
 
   /** Updates compact in-game objectives and moves for a level, or hides them for free play. */
   updateRun(run) {
-    this.run = run;
-    document.querySelector(".game").classList.toggle("level-active", this.view === "play" && Boolean(run));
     document.getElementById("level-hud").hidden = !run;
     document.getElementById("goal-list").hidden = !run;
-    document.querySelector(".screen").classList.toggle("campaign", Boolean(run));
     document.getElementById("restart").setAttribute("aria-label", run ? "Restart level" : "New game");
     if (!run) return;
     document.getElementById("level-label").textContent = `${String(run.level.id).padStart(2, "0")} · ${run.level.name}`;
@@ -147,10 +175,10 @@ export class GameShell extends EventTarget {
     }
     document.getElementById("result-label").textContent = `LEVEL ${String(run.level.id).padStart(2, "0")} · ${run.level.name}`;
     document.getElementById("result-title").textContent = won ? "Level cleared!" : "Out of moves";
-    document.getElementById("result-copy").textContent = won ? `${run.score} points · ${run.moves} moves used${run.level.id === LEVELS.length ? ". First circuit complete!" : ""}` : "Try another angle. Retry uses the same starting board.";
+    document.getElementById("result-copy").textContent = won ? `${run.score} points · ${run.moves} moves used${run.level.id === LEVELS.length ? ". All levels cleared." : ""}` : "Retry uses the same starting board.";
     document.getElementById("result-next").hidden = !won || run.level.id === LEVELS.length;
     document.getElementById("result-retry").textContent = won ? "PLAY AGAIN" : "TRY AGAIN";
     this.renderGoals(document.getElementById("result-goals"), run);
-    document.getElementById("result-dialog").showModal();
+    this.show("result");
   }
 }

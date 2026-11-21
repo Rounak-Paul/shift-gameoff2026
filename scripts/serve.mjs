@@ -4,6 +4,7 @@ import { resolve, extname, sep } from "node:path";
 const root = resolve(process.cwd());
 const types = {
   ".html": "text/html",
+  ".svg": "image/svg+xml",
   ".css": "text/css",
   ".js": "text/javascript",
   ".wav": "audio/wav",

@@ -19,3 +19,10 @@ User requested main menu, settings, and gameplay; clarified “take inspiration 
 - Menu and campaign fit 1280×720, 320×568 portrait, and 844×390 landscape without document overflow. Physical touch, Safari, and hosted itch iframe remain unverified.
 - A temporary stylesheet write error was caught during browser QA, corrected, and layouts rechecked. No remaining known regression from that error.
 - Initial difficulty values have verified solutions but still need human playtesting before expanding the campaign. No special candies, blockers, lives, monetization, or timers were added.
+
+## Copy refinement — 2026-11-19
+- User rejected promotional/filler text such as “Twelve puzzles. One rotating board.” Keep menus direct and functional. Removed main-menu slogans, conversational heading, free-play tagline, map filler, and redundant settings eyebrow. Result copy retains only factual outcome/retry information. Removed unused copy styles.
+- Build and diff check pass.
+
+## Console navigation — 2026-11-21
+- User requires a constant console and no popup panels. Supersedes earlier native-dialog/variable-menu-size implementation. See `.context/console-display-navigation.md` for display pages, retro title screen, responsive dimensions, and 32-test validation.

@@ -17,7 +17,7 @@
         <header class="marquee">
           <div class="wordmark">
             <svg class="logo" viewBox="0 0 29 7" role="img" aria-label="SHIFT">
-              <g fill="currentColor">
+              <g id="shift-wordmark" fill="currentColor">
                 <rect x="0" y="0" width="1" height="1" />
                 <rect x="1" y="0" width="1" height="1" />
                 <rect x="2" y="0" width="1" height="1" />
@@ -154,23 +154,77 @@
             </div>
             </div>
             <section id="home-view" class="screen-menu" aria-label="Main menu">
-              <p class="menu-eyebrow">SLIDE. TURN. MATCH.</p>
-              <h1>Ready to shift?</h1>
-              <p class="menu-copy">Twelve puzzles. One rotating board.</p>
-              <div class="menu-actions">
-                <button id="resume-game" class="menu-primary" hidden>RESUME</button>
-                <button id="play-levels" class="menu-primary">PLAY LEVELS</button>
-                <button id="free-play" class="menu-secondary">FREE PLAY <small>No limits. Just shift.</small></button>
-                <div class="menu-links"><button id="menu-settings">SETTINGS</button><button id="menu-help">HOW TO PLAY</button></div>
-              </div>
+              <h1 class="start-title" aria-label="SHIFT"><svg viewBox="0 0 29 7" aria-hidden="true"><use href="#shift-wordmark" /></svg></h1>
+              <div class="start-stripes" aria-hidden="true"><i></i><i></i><i></i></div>
+              <img class="start-cartridge" src="./assets/menu-cartridge.svg" alt="" />
+              <nav class="start-options" aria-label="Game options">
+                <button id="resume-game" class="start-option" hidden>RESUME</button>
+                <button id="play-levels" class="start-option">PLAY LEVELS</button>
+                <button id="free-play" class="start-option">FREE PLAY</button>
+                <button id="menu-settings" class="start-option">SETTINGS</button>
+                <button id="menu-help" class="start-option">HOW TO PLAY</button>
+              </nav>
               <p id="campaign-progress" class="menu-footnote"></p>
             </section>
             <section id="map-view" class="screen-menu level-menu" aria-labelledby="map-title" hidden>
-              <div class="menu-heading"><button id="map-back" aria-label="Back to main menu">←</button><div><p class="menu-eyebrow">THE FIRST CIRCUIT</p><h2 id="map-title">Choose a level</h2></div></div>
-              <p class="map-copy">Collect symbols. Clear brass. Make every move count.</p>
+              <div class="menu-heading"><button id="map-back" aria-label="Back to main menu">←</button><div><h2 id="map-title">Choose a level</h2></div></div>
               <div id="level-map" class="level-map"></div>
               <p class="menu-footnote">Turns are free · Every row slide uses one move</p>
             </section>
+    <section class="screen-menu console-page" hidden id="settings-view" aria-labelledby="settings-title">
+      <button id="close-settings" class="page-back" aria-label="Back">←</button>
+      <h2 id="settings-title">Settings</h2>
+      <label class="setting-row" for="setting-sound"><span>Sound effects</span><input id="setting-sound" type="checkbox" /></label>
+      <label class="setting-row volume-row" for="setting-volume"><span>Volume <output id="volume-value"></output></span><input id="setting-volume" type="range" min="0" max="100" step="1" /></label>
+      <label class="setting-row" for="setting-motion"><span>Motion</span><select id="setting-motion"><option value="system">Follow device</option><option value="reduced">Reduced</option><option value="full">Full</option></select></label>
+      <label class="setting-row" for="setting-particles"><span>Match particles</span><input id="setting-particles" type="checkbox" /></label>
+      <p class="settings-note">Preferences and level progress save on this device.</p>
+      <button id="fullscreen" class="menu-secondary" aria-label="Enter fullscreen">TOGGLE FULLSCREEN</button>
+      <button id="settings-done" class="primary">DONE</button>
+    </section>
+    <section class="screen-menu console-page" hidden id="intro-view" aria-labelledby="level-title">
+      <p id="level-intro-label" class="menu-eyebrow"></p><h2 id="level-title"></h2>
+      <div id="level-intro-goals" class="intro-goals"></div>
+      <p id="level-tip"></p><p id="level-budget" class="keys"></p>
+      <button id="begin-level" class="primary">START LEVEL</button>
+      <button id="cancel-level" class="cancel">Back to levels</button>
+    </section>
+    <section class="screen-menu console-page" hidden id="result-view" aria-labelledby="result-title">
+      <p id="result-label" class="menu-eyebrow"></p><h2 id="result-title"></h2>
+      <div id="result-goals" class="intro-goals"></div><p id="result-copy"></p>
+      <button id="result-next" class="primary">NEXT LEVEL</button>
+      <button id="result-retry" class="menu-secondary">TRY AGAIN</button>
+      <button id="result-map" class="cancel">Back to levels</button>
+    </section>
+    <section class="screen-menu console-page" hidden id="help-view" aria-labelledby="help-title">
+      <button class="page-back" aria-label="Back">←</button>
+      <h2 id="help-title">How to play</h2>
+      <div class="instructions">
+        <div>
+          <b>↔</b>
+          <p>Slide a row. It wraps.</p>
+        </div>
+        <div>
+          <b>↻</b>
+          <p>Turn the cartridge. Columns become rows.</p>
+        </div>
+        <div>
+          <b>● ● ●</b>
+          <p>Match 3 or more in a row or column. Cascades multiply points.</p>
+        </div>
+      </div>
+      <p class="keys">
+        Q / E or ← / → to turn · W / S or ↑ / ↓ to select · A / D to slide · H for a hint · Esc to cancel a drag or queued turn
+      </p>
+      <p class="keys">In levels, each row slide uses one move, regardless of distance. Turns and hints are free. A/D follows the full hinted slide in that direction. Complete every goal before moves run out; cascades finish before the result.</p>
+      <button class="primary close-help">GOT IT</button>
+    </section>
+    <section class="screen-menu console-page" hidden id="restart-view" aria-labelledby="restart-title">
+      <h2 id="restart-title">New game?</h2>
+      <p id="restart-copy">Your best score stays.</p>
+      <button id="confirm-restart" class="primary">RESTART</button
+      ><button id="cancel-restart" class="cancel">Keep playing</button>
+    </section>
           </div>
           <div class="control-panel">
             <div class="control-group">
@@ -216,61 +270,6 @@
         ><i class="case-screw right" aria-hidden="true"></i>
       </div>
     </main>
-    <dialog id="settings-dialog" aria-labelledby="settings-title">
-      <button id="close-settings" class="close-dialog" aria-label="Close settings">×</button>
-      <p class="menu-eyebrow">PREFERENCES</p>
-      <h2 id="settings-title">Settings</h2>
-      <label class="setting-row" for="setting-sound"><span>Sound effects</span><input id="setting-sound" type="checkbox" /></label>
-      <label class="setting-row volume-row" for="setting-volume"><span>Volume <output id="volume-value"></output></span><input id="setting-volume" type="range" min="0" max="100" step="1" /></label>
-      <label class="setting-row" for="setting-motion"><span>Motion</span><select id="setting-motion"><option value="system">Follow device</option><option value="reduced">Reduced</option><option value="full">Full</option></select></label>
-      <label class="setting-row" for="setting-particles"><span>Match particles</span><input id="setting-particles" type="checkbox" /></label>
-      <p class="settings-note">Preferences and level progress save on this device.</p>
-      <button id="fullscreen" class="menu-secondary" aria-label="Enter fullscreen">TOGGLE FULLSCREEN</button>
-      <button id="settings-done" class="primary">DONE</button>
-    </dialog>
-    <dialog id="level-dialog" aria-labelledby="level-title">
-      <p id="level-intro-label" class="menu-eyebrow"></p><h2 id="level-title"></h2>
-      <div id="level-intro-goals" class="intro-goals"></div>
-      <p id="level-tip"></p><p id="level-budget" class="keys"></p>
-      <button id="begin-level" class="primary">LET’S SHIFT</button>
-      <button id="cancel-level" class="cancel">Back to levels</button>
-    </dialog>
-    <dialog id="result-dialog" aria-labelledby="result-title">
-      <p id="result-label" class="menu-eyebrow"></p><h2 id="result-title"></h2>
-      <div id="result-goals" class="intro-goals"></div><p id="result-copy"></p>
-      <button id="result-next" class="primary">NEXT LEVEL</button>
-      <button id="result-retry" class="menu-secondary">TRY AGAIN</button>
-      <button id="result-map" class="cancel">Back to levels</button>
-    </dialog>
-    <dialog id="help-dialog" aria-labelledby="help-title">
-      <button class="close-dialog" aria-label="Close">×</button>
-      <h2 id="help-title">Slide. Turn. Match.</h2>
-      <div class="instructions">
-        <div>
-          <b>↔</b>
-          <p>Slide a row. It wraps.</p>
-        </div>
-        <div>
-          <b>↻</b>
-          <p>Turn the cartridge. Columns become rows.</p>
-        </div>
-        <div>
-          <b>● ● ●</b>
-          <p>Match 3 or more in a row or column. Cascades multiply points.</p>
-        </div>
-      </div>
-      <p class="keys">
-        Q / E or ← / → to turn · W / S or ↑ / ↓ to select · A / D to slide · H for a hint · Esc to cancel a drag or queued turn
-      </p>
-      <p class="keys">In levels, each row slide uses one move, regardless of distance. Turns and hints are free. A/D follows the full hinted slide in that direction. Complete every goal before moves run out; cascades finish before the result.</p>
-      <button class="primary close-help">GOT IT</button>
-    </dialog>
-    <dialog id="restart-dialog" aria-labelledby="restart-title">
-      <h2 id="restart-title">New game?</h2>
-      <p id="restart-copy">Your best score stays.</p>
-      <button id="confirm-restart" class="primary">RESTART</button
-      ><button class="cancel" autofocus>Keep playing</button>
-    </dialog>
     <script type="module" src="./src/game.js"></script>
   </body>
 </html>

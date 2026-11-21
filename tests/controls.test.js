@@ -57,7 +57,10 @@ function controller() {
     saveProfile() {},
     GameShell: class extends EventTarget {
       constructor() { super(); this.view = "play"; }
-      show() {} updateRun() {} syncSettings() {} result() {}
+      show(view) { this.view = view; }
+      open(view) { this.previous = this.view; this.show(view); }
+      back() { this.show(this.previous); }
+      updateRun() {} syncSettings() {} result() { this.show("result"); }
     },
     window: { addEventListener: (type, fn) => {
       if (!listeners.has(type)) listeners.set(type, []);
@@ -73,6 +76,7 @@ function controller() {
     devicePixelRatio: 1,
   });
   vm.runInContext(source, sandbox);
+  vm.runInContext('shell.view = "play"', sandbox);
   return {
     node,
     run: (code) => vm.runInContext(code, sandbox),
@@ -130,7 +134,7 @@ test("hints select their highlighted row for subsequent keyboard shifts", () => 
   assert.equal(game.run("row"), 4);
 });
 
-test("dialogs pause animation and clear a pending turn before resuming", () => {
+test("in-display pages pause animation and clear a pending turn before resuming", () => {
   const game = controller();
   game.key("e");
   game.key("e");
@@ -138,7 +142,7 @@ test("dialogs pause animation and clear a pending turn before resuming", () => {
   game.run("frame(1000)");
   assert.equal(game.run("angle"), 0);
   assert.equal(game.run("queued"), null);
-  game.node("help-dialog").close();
+  game.run("shell.back()");
   game.run("frame(2000)");
   assert.ok(game.run("angle") > 0);
 });

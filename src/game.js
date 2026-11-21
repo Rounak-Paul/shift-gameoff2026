@@ -341,7 +341,7 @@ function resolve() {
 
 /** Starts a springy quarter-turn or retains one request while another move settles. */
 function rotate(turn) {
-  if (shell.view !== "play" || run?.result || document.querySelector("dialog[open]")) return;
+  if (shell.view !== "play" || run?.result) return;
   if (mode === "drag") return;
   if (mode !== "idle") {
     queued = turn;
@@ -417,8 +417,7 @@ canvas.addEventListener("pointerdown", (event) => {
   if (
     event.button !== 0 ||
     shell.view !== "play" || run?.result ||
-    mode !== "idle" ||
-    document.querySelector("dialog[open]")
+    mode !== "idle"
   )
     return;
   const p = point(event);
@@ -460,7 +459,6 @@ document.addEventListener("visibilitychange", () => {
 window.addEventListener("keydown", (event) => {
   if (
     shell.view !== "play" || run?.result ||
-    document.querySelector("dialog[open]") ||
     event.altKey ||
     event.ctrlKey ||
     event.metaKey ||
@@ -582,54 +580,24 @@ document.addEventListener("fullscreenchange", () => {
     document.fullscreenElement ? "Exit fullscreen" : "Enter fullscreen",
   );
 });
-/** Opens the named dialog after safely canceling a held gesture and queued turn. */
-function openDialog(id) {
+/** Opens an in-display page after canceling held input and the queued turn. */
+function openPage(view) {
   if (drag) release({ pointerId }, true);
   queued = null;
   hover = -1;
-  $(id).showModal();
+  shell.open(view);
 }
-$("help").addEventListener("click", () => openDialog("help-dialog"));
-for (const button of $("help-dialog").querySelectorAll(".close-dialog,.close-help"))
-  button.addEventListener("click", () => $("help-dialog").close());
+$("help").addEventListener("click", () => openPage("help"));
 $("restart").addEventListener("click", () => {
   $("restart-title").textContent = run ? "Restart level?" : "New game?";
   $("restart-copy").textContent = run ? "Start this level again with the same board and all your moves." : "Your best score stays.";
-  openDialog("restart-dialog");
+  openPage("restart");
 });
 $("confirm-restart").addEventListener("click", () => {
-  $("restart-dialog").close();
   reset(run?.level || null);
-  canvas.focus({ preventScroll: true });
+  shell.show("play");
 });
-$("restart-dialog")
-  .querySelector(".cancel")
-  .addEventListener("click", () => $("restart-dialog").close());
-for (const dialog of document.querySelectorAll("dialog")) {
-  dialog.addEventListener("cancel", (event) => {
-    if (dialog.id === "result-dialog") {
-      event.preventDefault();
-      dialog.close();
-      shell.show("map");
-    }
-  });
-  dialog.addEventListener("close", () => {
-    lastTime = 0;
-    if (shell.view === "play" && !run?.result) canvas.focus({ preventScroll: true });
-  });
-  dialog.addEventListener("click", (e) => {
-    if (e.target === dialog && !["result-dialog", "level-dialog"].includes(dialog.id)) {
-      const rect = dialog.getBoundingClientRect();
-      if (
-        e.clientX < rect.left ||
-        e.clientX > rect.right ||
-        e.clientY < rect.top ||
-        e.clientY > rect.bottom
-      )
-        dialog.close();
-    }
-  });
-}
+shell.addEventListener("viewchange", () => { lastTime = 0; });
 
 /** Pauses the attempt on the main menu without losing its current board or progress. */
 function pauseHome() {
@@ -650,10 +618,9 @@ shell.addEventListener("preferences", () => {
 shell.addEventListener("action", (event) => {
   const { action, id } = event.detail;
   if (action === "settings" || action === "help") {
-    openDialog(action === "settings" ? "settings-dialog" : "help-dialog");
+    openPage(action);
     return;
   }
-  for (const dialog of document.querySelectorAll("dialog[open]")) dialog.close();
   if (action === "home") pauseHome();
   else if (action === "levels") { queued = null; shell.show("map"); }
   else if (action === "resume") shell.show("play");
@@ -674,7 +641,7 @@ shell.addEventListener("action", (event) => {
 function frame(time) {
   const dt = lastTime ? Math.min((time - lastTime) / 1000, 1 / 30) : 1 / 60;
   lastTime = time;
-  if (!document.hidden && shell.view === "play" && !document.querySelector("dialog[open]")) {
+  if (!document.hidden && shell.view === "play") {
     if (mode === "drag") {
       [offset, velocity] = reducedMotion
         ? [drag.target, 0]
